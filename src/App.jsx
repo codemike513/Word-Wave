@@ -4,14 +4,20 @@ import HomePage from "./components/HomePage";
 import FileDisplay from "./components/FileDisplay";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [file, setFile] = useState(null);
+  const [audioStream, setAudioStream] = useState(null);
+
+  const isAudioAvailable = file || audioStream;
 
   return (
     <div className="flex flex-col max-w-[1000px] mx-auto w-full">
       <section className="min-h-screen flex flex-col">
         <Header />
-        <HomePage />
-        <FileDisplay />
+        {isAudioAvailable ? (
+          <FileDisplay file={file} audioStream={audioStream} />
+        ) : (
+          <HomePage setFile={setFile} setAudioStream={setAudioStream} />
+        )}
       </section>
     </div>
   );
