@@ -1,7 +1,7 @@
 import React from "react";
 
 function FileDisplay(props) {
-  const { file, audioStream } = props;
+  const { handleAudioReset, file, audioStream } = props;
 
   return (
     <main className="flex-1 flex flex-col p-4 gap-3 text-center sm:gap-4 justify-center pb-20 min-w-72 w-72 sm:w-96 max-w-full mx-auto">
@@ -13,7 +13,10 @@ function FileDisplay(props) {
         <p>{file.name}</p>
       </div>
       <div className="flex items-center justify-between gap-4">
-        <button className="text-slate-400 hover:text-blue-600 duration-200">
+        <button
+          onClick={handleAudioReset}
+          className="text-slate-400 hover:text-blue-600 duration-200"
+        >
           Reset
         </button>
         <button className="specialBtn p-2 px-3 rounded-lg text-blue-400 flex items-center gap-2 font-medium">
