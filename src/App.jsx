@@ -45,6 +45,7 @@ function App() {
           break;
         case "RESULT":
           setOutput(e.data.results);
+          console.log(e.data.results);
           break;
         case "INFERENCE_DONE":
           setFinished(true);
@@ -74,7 +75,7 @@ function App() {
     }
 
     let audio = await readAudioFrom(file ? file : audioStream);
-    const model_name = "openai/whisper-tiny.en";
+    const model_name = `openai/whisper-tiny.en`;
 
     worker.current.postMessage({
       type: MessageTypes.INFERENCE_REQUEST,
@@ -88,11 +89,12 @@ function App() {
       <section className="min-h-screen flex flex-col">
         <Header />
         {output ? (
-          <Information />
+          <Information output={output} />
         ) : loading ? (
           <Transcribing />
         ) : isAudioAvailable ? (
           <FileDisplay
+            handleFormSubmission={handleFormSubmission}
             handleAudioReset={handleAudioReset}
             file={file}
             audioStream={audioStream}
