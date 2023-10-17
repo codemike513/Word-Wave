@@ -8,7 +8,7 @@ class MyTranscriptionPipeline {
 
   static async getInstance(progress_callback = null) {
     if (this.instance === null) {
-      this.instance = await pipeline(this.task, null, {
+      this.instance = await pipeline(this.task, this.model, {
         progress_callback,
       });
     }
