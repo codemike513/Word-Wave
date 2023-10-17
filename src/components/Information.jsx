@@ -1,22 +1,81 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Transcription from "./Transcription";
 import Translation from "./Translation";
 
 function Information(props) {
-  const { output } = props;
+  const { output, finished } = props;
   const [tab, setTab] = useState("transcription");
+  const [toLanguage, setToLanguage] = useState("Select Language");
+  const [translation, setTranslation] = useState(null);
+  const [translating, setTranslating] = useState(null);
+
+  console.log(output);
+
+  const worker = useRef();
+
+  useEffect(() => {
+    if (!worker.current) {
+      worker.current = new Worker(
+        new URL("../utils/translate.worker.js", import.meta.url),
+        {
+          type: "module",
+        }
+      );
+    }
+
+    const onMessageRecieved = async (e) => {
+      switch (e.data.status) {
+        case "initiate":
+          console.log("DOWNLOADING");
+          break;
+        case "progress":
+          console.log("LOADING");
+          break;
+        case "update":
+          setTranslation(e.data.output);
+          console.log(e.data.output);
+          break;
+        case "complete":
+          setTranslating(false);
+          console.log("DONE");
+          break;
+      }
+    };
+
+    worker.current.addEventListener("message", onMessageRecieved);
+
+    return () =>
+      worker.current.removeEventListener("message", onMessageRecieved);
+  });
+
+  const textElement =
+    tab === "transcription" ? output.map((val) => val.text) : translation || "";
 
   function handleCopy() {
-    navigator.clipboard.writeText();
+    navigator.clipboard.writeText(textElement);
   }
 
   function handleDownload() {
     const element = document.createElement("a");
-    const file = new Blob([], { type: "text/plain" });
+    const file = new Blob([textElement], { type: "text/plain" });
     element.href = URL.createObjectURL(file);
     element.download = `Freescribe_${new Date().toString()}.txt`;
     document.body.appendChild(element);
     element.click();
+  }
+
+  function generateTranslation() {
+    if (translating || toLanguage === "Select Language") {
+      return;
+    }
+
+    setTranslating(true);
+
+    worker.current.postMessage({
+      text: output.map((val) => val.text),
+      src_language: "eng_Latn",
+      tgt_lang: toLanguage,
+    });
   }
 
   return (
@@ -50,11 +109,25 @@ function Information(props) {
           Translation
         </button>
       </div>
-      <div className="my-8 flex flex-col">
+      <div className="my-8 flex flex-col-reverse max-w-prose w-full mx-auto gap-4">
+        {(!finished && translating) && (
+          <div className="grid place-items-center">
+            <i className="fa-solid fa-spinner animate-spin"></i>
+          </div>
+        )}
         {tab === "transcription" ? (
-          <Transcription {...props} />
+          <Transcription {...props} textElement={textElement} />
         ) : (
-          <Translation {...props} />
+          <Translation
+            {...props}
+            toLanguage={toLanguage}
+            translating={translating}
+            textElement={textElement}
+            setTranslating={setTranslating}
+            setTranslation={setTranslation}
+            setToLanguage={setToLanguage}
+            generateTranslation={generateTranslation}
+          />
         )}
       </div>
       <div className="flex items-center gap-4 mx-auto text-base">
