@@ -59,7 +59,7 @@ function Information(props) {
     const element = document.createElement("a");
     const file = new Blob([textElement], { type: "text/plain" });
     element.href = URL.createObjectURL(file);
-    element.download = `Freescribe_${new Date().toString()}.txt`;
+    element.download = `WordWave_${new Date().toString()}.txt`;
     document.body.appendChild(element);
     element.click();
   }
@@ -110,7 +110,7 @@ function Information(props) {
         </button>
       </div>
       <div className="my-8 flex flex-col-reverse max-w-prose w-full mx-auto gap-4">
-        {(!finished && translating) && (
+        {!finished && translating && (
           <div className="grid place-items-center">
             <i className="fa-solid fa-spinner animate-spin"></i>
           </div>
